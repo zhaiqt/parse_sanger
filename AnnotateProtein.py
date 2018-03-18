@@ -15,7 +15,7 @@ class AnnotateProtein(object):
 			self._species=species.lower()
 		else:
 			print "Error: the species can't be recognized by AnnotateProtein"
-	
+
 		if chaintype.upper() in ["H",'HC',"VH"]:
                         self._chain='H'
 		elif chaintype.upper() in ["K","KAPPA","KL","LK","VK","KV","L","VL","LV","LC"]:
@@ -23,7 +23,7 @@ class AnnotateProtein(object):
                 elif chaintype.upper() in ["LAMBDA"]:
                         self._chain='L'
 
-		databasePath='/home/zhaiqi1/NGS/PWM'
+		databasePath='/Users/zhaiqi1/Documents/Novartis/my_code/NGS/PMW'
 
 		PMW_FR1head_name=databasePath+'/'+self._species+'/'+self._chain+'/FR1_head_PMW_'+self._species+'.json'
 		PMW_FR1tail_name=databasePath+'/'+self._species+'/'+self._chain+'/FR1_tail_PMW_'+self._species+'.json'
@@ -33,7 +33,7 @@ class AnnotateProtein(object):
 		PMW_FR3tail_name=databasePath+'/'+self._species+'/'+self._chain+'/FR3_tail_PMW_'+self._species+'.json'
 		PMW_FR4head_name=databasePath+'/'+self._species+'/'+self._chain+'/FR4_head_PMW_'+self._species+'.json'
 		#PMW_FR4tail_name=databasePath+'/'+self._species+'/'+self._chain+'/FR4_tail_PMW_'+self._species+'.json'
-	
+
 		with open(PMW_FR1head_name,'r') as fp:
 			self._pwmFR1head=json.load(fp)
 		with open(PMW_FR1tail_name,'r') as fp:
@@ -51,17 +51,17 @@ class AnnotateProtein(object):
 		#with open(PMW_FR4tail_name,'r') as fp:
 			#self._pwmFR4tail=json.load(fp)
 
-	def AnnotateDict(self):	
+	def AnnotateDict(self):
 		#print self._dict
 		for seqID,seqInfo in self._dict.iteritems():
 			#print "ANnotate"
 			#print seqInfo
-			self.AnnotateSingleAb(seqID,seqInfo["PRO"],seqInfo["DNA"]) 	
+			self.AnnotateSingleAb(seqID,seqInfo["PRO"],seqInfo["DNA"])
 			#print "seqID : "+seqID
 			#print "PRO :" + seqInfo['PRO']
 			#print "DNA :" + seqInfo['DNA']
 		return
-	
+
 	def AnnotateSingleAb(self,inSeqID, inProteinSeq,inDNAseq):
                 if not inProteinSeq and  not inDNAseq:
         	        return ""
@@ -72,36 +72,36 @@ class AnnotateProtein(object):
 
 		count_missing_fragment =0
 		for x in ("FR1","CDR1","FR2",'CDR2','FR3','CDR3'):
-			try: 
+			try:
 				#pdb.set_trace()
 				dna_frag= inDNAseq[self._dict[inSeqID][x+"head_pos"]-1:self._dict[inSeqID][x+'tail_pos']]
 				#print "DNA_frag : "  + dna_frag
 				#print "PRO_Frag : " + translator.translate_dna_single(dna_frag)
 				self._dict[inSeqID].update({x+'-DNA': dna_frag})
-				self._dict[inSeqID].update({x+'-PRO':translator.translate_dna_single(dna_frag)})	
-			except: 
+				self._dict[inSeqID].update({x+'-PRO':translator.translate_dna_single(dna_frag)})
+			except:
 				print "IgBlastn couldn't find: "+ inSeqID + ':' + x
 				count_missing_fragment += 1
 				if count_missing_fragment > 2:
-					print "Warining! missing the some fragmentation from IgBlastn in this sequence:"
-					print inDNAseq
-					return 
+					#print "Warining! missing the some fragmentation from IgBlastn in this sequence:"
+					#print inDNAseq
+					return
 
-							
+
 		FR1head=self.find_high_PMW_score(self._pwmFR1head,inProteinSeq)
 		FR1head_pos=inProteinSeq.find(FR1head)
 
 		#print "start to find FR2"
 		try :
 			FR1tail_pos=self._dict[inSeqID]["FR1tail_pos"]/3 -1
-		except: 
+		except:
 			FR1tail=self.find_high_PMW_score(self._pwmFR1tail,inProteinSeq[FR1head_pos:])
 			FR1tail_pos=inProteinSeq.find(FR1tail)+len(FR1tail)-1
 
 		new_FR1protein=inProteinSeq[FR1head_pos:FR1tail_pos+1]
 		new_FR1dna= translator.convertPROtoDNA(inDNAseq,FR1head_pos,FR1tail_pos+1)
 		if len(new_FR1dna)>=len(self._dict[inSeqID]['FR1-DNA']):
-			self._dict[inSeqID].update({'FR1-PRO':new_FR1protein})	
+			self._dict[inSeqID].update({'FR1-PRO':new_FR1protein})
 			self._dict[inSeqID].update({'FR1-DNA':new_FR1dna})
 		'''
 		try:
@@ -119,12 +119,12 @@ class AnnotateProtein(object):
 			FR2head=self.find_high_PMW_score(self._pwmFR2head,inProteinSeq[FR1tail_pos:])
 			FR2head_pos=inProteinSeq.find(FR2head)
 		if self._dict[inSeqID]["FR2-DNA"] !='':
-			pass	
+			pass
                 elif FR1tail_pos and FR2head_pos :
 			self._dict[inSeqID].update({'CDR1-PRO':inProteinSeq[FR1tail_pos+1:FR2head_pos]})
                 	self._dict[inSeqID].update({'CDR1-DNA':translator.convertPROtoDNA(inDNAseq,FR1tail_pos+1,FR2head_pos)})
 
-		try : 
+		try :
 			FR2tail_pos= (self._dict[inSeqID]["CDR2head_pos"]-1)/3 -1
 		except:
 			FR2tail=self.find_high_PMW_score(self._pwmFR2tail,inProteinSeq[FR2head_pos:])
@@ -152,7 +152,7 @@ class AnnotateProtein(object):
 
 		try:
 			FR3tail_pos= (self._dict[inSeqID]["CDR3head_pos"]-1)/3 -1
-		except: 
+		except:
 			FR3tail=self.find_high_PMW_score(self._pwmFR3tail,inProteinSeq[FR3head_pos:])
 			FR3tail_pos=inProteinSeq.find(FR3tail)+len(FR3tail)-1
 		if self._dict[inSeqID]["FR3-DNA"] !='' !='':
@@ -170,7 +170,7 @@ class AnnotateProtein(object):
 			FR4head_pos=inProteinSeq.find(FR4head)
 		new_CDR3protein= inProteinSeq[FR3tail_pos+1:FR4head_pos]
 		new_FR3dna= translator.convertPROtoDNA(inDNAseq,FR3tail_pos+1,FR4head_pos)
-		if FR3tail_pos and FR4head_pos and len(new_FR3dna)> len(self._dict[inSeqID]["CDR3-DNA"]):	
+		if FR3tail_pos and FR4head_pos and len(new_FR3dna)> len(self._dict[inSeqID]["CDR3-DNA"]):
 			self._dict[inSeqID].update({'CDR3-PRO':inProteinSeq[FR3tail_pos+1:FR4head_pos]})
 			self._dict[inSeqID].update({'CDR3-DNA':translator.convertPROtoDNA(inDNAseq,FR3tail_pos+1,FR4head_pos)})
 		#pdb.set_trace()
@@ -197,7 +197,7 @@ class AnnotateProtein(object):
 		#print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
 		#print fragment
 		if len(fragment)<len(PMW_dict):
-			return "" 
+			return ""
 		input_seq=fragment
 		motif_size=len(PMW_dict)
                 find_flag=False
@@ -205,18 +205,18 @@ class AnnotateProtein(object):
                         stop= min(len(input_seq),motif_size)
                         frag_window=input_seq[0:stop]
 			backup_frag= None
-			backup_score=  -1 
+			backup_score=  -1
                         score=0
                         i=0
 			while (i< motif_size) :
 				if input_seq[i]in ["*","x"]:
 					i+=1
-					continue	
+					continue
                                 #print "PMW_dict[str(i)]" + str(PMW_dict[str(i)])
 				#print "[input_seq[i]]" + input_seq[i]
 				score= score+ float(PMW_dict[str(i)][input_seq[i]])
 				#tmp_table=PMW_dict[str(i)]['E']
-				#print "the current accumulate  score is at position"+str(i) +"is :" + str(score)	
+				#print "the current accumulate  score is at position"+str(i) +"is :" + str(score)
 				i+=1
                         #print "score of %s is %d" %(frag_window,score)
 			if score >5:
@@ -232,15 +232,15 @@ class AnnotateProtein(object):
 			elif len(input_seq)>motif_size and score <=5:
                         	input_seq=input_seq[1:]
 
-               	#print find_flag 
+               	#print find_flag
 		#print frag_window
                 #print fragment.find(frag_window)
 		if find_flag == True:
 			#print "Final Score of " + frag_window +' : ' + str(score)
-			return  backup_frag 
-		else: 
+			return  backup_frag
+		else:
 			#print "can't find"
-			return "" 
+			return ""
 
 
 ###----------Test----------
@@ -252,7 +252,7 @@ a= {'test': { "DNA": 'CAGGTCCAACTGCAGCAGCCTGACATCTGAGGACTCTGCGGTCTATTACTGTGCAAGA
 b=AnnotateProtein(a,'mouse',"H")
 b.AnnotateDict()
 for ID,infor in a.iteritems():
-	print "~~~ID is :" + ID 
+	print "~~~ID is :" + ID
 	for key,value in infor.iteritems():
 		if key.endswith("PRO") or key.endswith("DNA"):
 			print key +":" + value

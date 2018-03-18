@@ -1,7 +1,6 @@
 
 import os
 
-
 class ReadIgBlastn(object):
     """ return dictionary with germline, CDR boundaries"""
     def __init__(self,inputName):
@@ -22,11 +21,14 @@ class ReadIgBlastn(object):
 			seqID=line[2]
 			self._dict[seqID]={'GERMLINE-V':"",'GERMLINE-D':"",'GERMLINE-J':""}
                 elif line.startswith("# V-(D)-J rearrangement summary"):
-			germFlag=True 
+			germFlag=True
 		elif any([line.startswith(x) for x in ("FR1","CDR1","FR2",'CDR2','FR3','CDR3') ]):
 			line = line.split()
 			y = line[0].split('-')
-			self._dict[seqID].update({y[0]+"head_pos":int(line[-7]),y[0]+"tail_pos":int(line[-6])} )
+			try:
+				self._dict[seqID].update({y[0]+"head_pos":int(line[-7]),y[0]+"tail_pos":int(line[-6])} )
+			except:
+				print x + "dosen't exist in " + seqID
 		elif germFlag:
                         if line.startswith("#"):
                                 self._dict[seqID]={'GERMLINE-V':"",'GERMLINE-D':"",'GERMLINE-J':""}
@@ -37,13 +39,15 @@ class ReadIgBlastn(object):
 
 
 
+
+########
 '''
-test=ReadIgBlastn("./test/results/HC_tmp_DNA.igblastn")
+test=ReadIgBlastn("/Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/parse_sanger/results/LC_consensus_seq.igblastn")
 test.readIgBlastn()
+print "$$$$$$$"
 print test._dict
 for key in test._dict:
     print key
     for key2 in test._dict[key]:
 	print test._dict[key]
-
 '''

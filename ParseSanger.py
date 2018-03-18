@@ -11,7 +11,7 @@ import argparse
 
 #python IDAP384screen.py -i /Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/IDAP384screen/IDAP_5_star/rawdata/ensingle.csv.zip -c /Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/IDAP384screen/IDAP_5_star/rawdata/barcode_Table.csv -o /Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/IDAP384screen/IDAP_5_star/result
 parser = argparse.ArgumentParser( prog='SangerPairSeqContig',description="Read paired-ends sanger sequneces, convert to fastq, and merge the Forward and the reverse reads, -> 1) fasta contains the assembled sequences, 2) fasta with non-assembled sequences", epilog='python Sanger2Fastq -i inputfile.zip  -o outputpath')
-parser.add_argument ('-i','--inputzip',help='Input zipfile', default='/Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/parse_sanger/raw/all.zip')
+parser.add_argument ('-i','--inputzip',help='Input zipfile', default='/Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/parse_sanger/raw/TIM1_arm3_LC.zip')
 parser.add_argument('-o', '--outputpath',help='outputpath for output',default='/Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/parse_sanger/results')
 parser.print_help()
 args=parser.parse_args()
@@ -74,6 +74,8 @@ print 'length of all fastq_dict :' + str(len(all_fastq_dict))
 ReadSanger.write_fasta_bygroup(all_fastq_dict,outfilepath_group_fasta,False)
 # write trimed fasta
 ReadSanger.write_fasta_bygroup(all_fastq_dict,outfilepath_group_trimed_fasta,True)
+# write gouped untrimed fastQ, same direction
+ReadSanger.write_fastq_bygroup(all_fastq_dict,outfilepath_parsed_fastq,False)
 
 '''
 (All_fastq_path,All_fasta_dict)=MergeMultiFastQ.read_FastQs_dict(outfilepath_All,args.outputpath)

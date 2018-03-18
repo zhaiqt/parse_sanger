@@ -71,7 +71,7 @@ def concentrate2single(infilepath,outputfilename):  #also reverse translate
                     row = row.strip('\n')
                     if row.startswith("@"):
                         row = row.split(";")
-                        if "QB6179" in row[1] or "QB5506" in row[1]:
+                        if "QB6179" in row[1] or "QB5506" in row[1] or 'QB6178' in row[1] or 'Rev' in row[1] or 'rev' in row[1]:
                             flag_reverse = True
                         IDs=re.search('\d{4}',row[0])  ###### Extract 4 numbers , return
                         ID=IDs.group(0)  #####
@@ -108,6 +108,14 @@ def covert_Qscore(String):
         #Q_score ([ord(x)-33 for x in String])
 	return Q_score
 
+########
+def reverse_convert_Qscore(list):
+    Q_string=''
+    for i in list:
+        Q_string += chr(i+33)
+    return Q_string
+
+
 
 ##############
 def write_fasta_bygroup(indict,outputpath,flag_trim):
@@ -126,4 +134,26 @@ def write_fasta_bygroup(indict,outputpath,flag_trim):
             output='>'+fastq[0]+'\n'+fastq[1]+'\n'
             fasta_outfile.write(output)
         fasta_outfile.close()
+    return
+####################
+
+##############
+def write_fastq_bygroup(indict,outputpath,flag_trim):
+
+    for ID,fastqs in indict.iteritems():
+        fastq_outname = os.path.join(outputpath,ID)
+        fastq_outfile = open(fastq_outname,'w')
+        i=0
+        for fastq in fastqs:
+            if flag_trim == True:
+
+                object1 = TrimEnds.TrimEnds(fastq)
+                object1.trim5End(minimum_quality=20)
+                fastq = object1.output_trimed_fastq()
+
+            output='@'+fastq[0]+'_'+str(i)+'\n'+fastq[1]+'\n'+fastq[2]+'\n'+reverse_convert_Qscore(fastq[3])+'\n'
+            fastq_outfile.write(output)
+            i +=1
+
+        fastq_outfile.close()
     return
