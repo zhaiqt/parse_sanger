@@ -32,7 +32,7 @@ class AnnotateProtein(object):
 		PMW_FR3head_name=databasePath+'/'+self._species+'/'+self._chain+'/FR3_head_PMW_'+self._species+'.json'
 		PMW_FR3tail_name=databasePath+'/'+self._species+'/'+self._chain+'/FR3_tail_PMW_'+self._species+'.json'
 		PMW_FR4head_name=databasePath+'/'+self._species+'/'+self._chain+'/FR4_head_PMW_'+self._species+'.json'
-		#PMW_FR4tail_name=databasePath+'/'+self._species+'/'+self._chain+'/FR4_tail_PMW_'+self._species+'.json'
+		PMW_FR4tail_name=databasePath+'/'+self._species+'/'+self._chain+'/FR4_tail_PMW_'+self._species+'.json'
 
 		with open(PMW_FR1head_name,'r') as fp:
 			self._pwmFR1head=json.load(fp)
@@ -48,8 +48,8 @@ class AnnotateProtein(object):
 			self._pwmFR3tail=json.load(fp)
 		with open(PMW_FR4head_name,'r') as fp:
 			self._pwmFR4head=json.load(fp)
-		#with open(PMW_FR4tail_name,'r') as fp:
-			#self._pwmFR4tail=json.load(fp)
+		with open(PMW_FR4tail_name,'r') as fp:
+			self._pwmFR4tail=json.load(fp)
 
 	def AnnotateDict(self):
 		#print self._dict
@@ -174,11 +174,16 @@ class AnnotateProtein(object):
 			self._dict[inSeqID].update({'CDR3-PRO':inProteinSeq[FR3tail_pos+1:FR4head_pos]})
 			self._dict[inSeqID].update({'CDR3-DNA':translator.convertPROtoDNA(inDNAseq,FR3tail_pos+1,FR4head_pos)})
 		#pdb.set_trace()
-		FR4tail=self.find_high_PMW_score(self._pwmFR4head,inProteinSeq[FR3tail_pos:])
+
+		FR4tail=self.find_high_PMW_score(self._pwmFR4tail,inProteinSeq[FR4head_pos:])
 		FR4tail_pos=inProteinSeq.find(FR4tail)+len(FR4tail)-1
+		print "$$$$$ FR4tail_pos + "
+		print FR4tail_pos
+
 		if FR4head and FR4tail:
 			self._dict[inSeqID].update({'FR4-PRO':inProteinSeq[FR4head_pos:FR4tail_pos+1]})
 			self._dict[inSeqID].update({'FR4-DNA':translator.convertPROtoDNA(inDNAseq,FR4head_pos,FR4tail_pos+1)})
+			print self._dict[inSeqID]['FR4-PRO']
 		elif FR4head:
 			self._dict[inSeqID].update({'FR4-PRO':FR4head})
 			self._dict[inSeqID].update({'FR4-DNA':translator.convertPROtoDNA(inDNAseq,FR4head_pos,len(inProteinSeq))})
@@ -186,8 +191,10 @@ class AnnotateProtein(object):
 			self._dict[inSeqID].update({'FR4-PRO':''})
 			self._dict[inSeqID].update({'FR4-DNA':''})
 
+
 		FVpro =self._dict[inSeqID]["FR1-PRO"]+self._dict[inSeqID]["CDR1-PRO"]+self._dict[inSeqID]["FR2-PRO"]+self._dict[inSeqID]["CDR2-PRO"]+self._dict[inSeqID]["FR3-PRO"]+self._dict[inSeqID]["CDR3-PRO"]+self._dict[inSeqID]["FR4-PRO"]
 		self._dict[inSeqID].update({'FV-PRO': FVpro })
+
 		FVdna=self._dict[inSeqID]["FR1-DNA"]+self._dict[inSeqID]["CDR1-DNA"]+self._dict[inSeqID]["FR2-DNA"]+self._dict[inSeqID]["CDR2-DNA"]+self._dict[inSeqID]["FR3-DNA"]+self._dict[inSeqID]["CDR3-DNA"]+self._dict[inSeqID]["FR4-DNA"]
                 self._dict[inSeqID].update({'FV-DNA':FVdna})
 		#self._dict[inSeqID].update({'DNAlen':len(FVdna)})

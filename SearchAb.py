@@ -52,7 +52,7 @@ for a,b in AbDict.iteritems():
 ### keyList=["GERMLINE-V","GERMLINE-D","GERMLINE-J","PRODUCT","CHAIN","LID","RID","DNA","PRO",'FR1-PRO','CDR1-PRO','FR2-PRO','CDR2-PRO',"FR3-PRO",'CDR3-PRO','FR4-PRO','FR1-DNA','CDR1-DNA','FR2-DNA','CDR2-DNA',"FR3-DNA",'CDR3-DNA','FR4-DNA']
 print "write out all the information of AbDict ........"
 #WriteFast.writeDict_keys(AbDict,args.outputpath,prefix,keylist)
-WriteFast.writeDict_keys(AbDict,args.outputpath,"searchab_")
+WriteFast.writeDict_keys(AbDict,args.outputpath,args.species+'_'+args.chain+'_')
 
 
 '''

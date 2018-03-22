@@ -1,6 +1,8 @@
 #import pdb
 import os
 import NameGermline
+import re
+
 def write2FastQ(Q2,outpath):
 	Outfile_trimed2FastQ = open(outpath, "a+")
 	for fastq in Q2:
@@ -57,10 +59,10 @@ def writeDict_ProDNA(inDict,outpath, prefix):
 	return os.path.join(outpath,prefix+ "_tmp_DNA.fasta")
 
 def writeDict_keys(inDict,outpath,prefix):
-	Outfile_all = open(os.path.join(outpath,prefix+"_all.csv"), "a+")
+	Outfile_all = open(os.path.join(outpath,prefix+"all.csv"), "a+")
 	keyList=['FV-PRO','FV-DNA',"GERMLINE-V",'GERMLINE-D','GERMLINE-J','FR1-PRO','CDR1-PRO','FR2-PRO','CDR2-PRO',"FR3-PRO",'CDR3-PRO','FR4-PRO','PRO',"DNA",'FR1-PRO','CDR1-DNA','FR2-PRO','CDR2-DNA','FR3-DNA','CDR3-DNA','FR4-DNA','FR4-DNA']
 
-	firstline = "# Name,"
+	firstline = "# Name, Productive,"
 
 	for keyword in keyList:
 		firstline += keyword +','
@@ -70,8 +72,16 @@ def writeDict_keys(inDict,outpath,prefix):
 
 
 	for ID,info in inDict.iteritems():
+
+		ID=re.split(r'\D', ID)
+		ID = ID[0]
 		line=ID+","
 		#print info.values()
+		if '' in info.values() or '*' in info['FV-PRO']:
+			line += 'No,'
+		else:
+			line += 'Yes,'
+
 		for keyword in keyList:
 			#pdb.set_trace()
 			#print keyword + ":" + str(info[keyword])
@@ -79,6 +89,7 @@ def writeDict_keys(inDict,outpath,prefix):
 			#line +=str(info[keyword])
 			#line +="\t"
 			#print "found it !"
+
 			tmp= info[keyword]
 			if tmp== '' :
 				tmp = '  '
