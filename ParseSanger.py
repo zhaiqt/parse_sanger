@@ -11,7 +11,7 @@ import argparse
 
 #python IDAP384screen.py -i /Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/IDAP384screen/IDAP_5_star/rawdata/ensingle.csv.zip -c /Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/IDAP384screen/IDAP_5_star/rawdata/barcode_Table.csv -o /Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/IDAP384screen/IDAP_5_star/result
 parser = argparse.ArgumentParser( prog='SangerPairSeqContig',description="Read paired-ends sanger sequneces, convert to fastq, and merge the Forward and the reverse reads, -> 1) fasta contains the assembled sequences, 2) fasta with non-assembled sequences", epilog='python Sanger2Fastq -i inputfile.zip  -o outputpath')
-parser.add_argument ('-i','--inputzip',help='Input zipfile', default='/Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/parse_sanger/raw/TIM1_arm3_LC.zip')
+parser.add_argument ('-i','--inputzip',help='Input zipfile', default='/Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/parse_sanger/raw/Archive.zip')
 parser.add_argument('-o', '--outputpath',help='outputpath for output',default='/Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/parse_sanger/results')
 parser.print_help()
 args=parser.parse_args()
@@ -60,7 +60,6 @@ for dirname in [outfilepath_rawfastq,outfilepath_parsed_fastq,outfilepath_group_
 
 
 #####  convert Abi/ab1 to a fastq file  ############
-
 ReadSanger.read_sanger(abi_path,outfilepath_rawfastq)
 
 ######## combine all the fastq to a single fastq, And change the name to single dict######

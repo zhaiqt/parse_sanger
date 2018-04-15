@@ -11,9 +11,9 @@ def extract_zip(infile,outfilePath):
     if infile.endswith(".zip"):
         with zipfile.ZipFile(infile, 'r') as z:
             print "zipfile zipfile"
-            z.extractall(outfilePath)
-        localfilename = os.path.basename (z.filename)
-        abi_path = os.path.join(outfilePath,localfilename.rsplit('.zip')[0])
+            localfilename = os.path.basename(z.filename)
+            abi_path = os.path.join(outfilePath,localfilename.rsplit('.zip')[0])
+            z.extractall(abi_path)
         print abi_path
     return abi_path
 
@@ -52,6 +52,9 @@ def read_sanger(infilepath,outfilepath):
 ############################################
 def concentrate2single(infilepath,outputfilename):  #also reverse translate
     #combinedfile_name = os.path.basename(infilepath)
+    raw_single_fasta_name =outputfilename.rstrip('.fastq')+'.fasta'
+    raw_single_fasta_file = open(raw_single_fasta_name, 'wb')
+
     all_fastq = {}
     count_file =0
     #combinedfile_name =os.path.join(outputfilename,combinedfile_name+'.fastq')
@@ -70,10 +73,11 @@ def concentrate2single(infilepath,outputfilename):  #also reverse translate
                 for row in f:
                     row = row.strip('\n')
                     if row.startswith("@"):
-                        row = row.split(";")
-                        if "QB6179" in row[1] or "QB5506" in row[1] or 'QB6178' in row[1] or 'Rev' in row[1] or 'rev' in row[1]:
+                        fasta_output = '\n>'+row.lstrip('@')+'\n'
+                        # row = row.split(";")
+                        if "QB6179" in row or "QB5506" in row or 'QB6178' in row or 'Rev' in row or 'rev' in row:
                             flag_reverse = True
-                        IDs=re.search('\d{4}',row[0])  ###### Extract 4 numbers , return
+                        IDs=re.search('\D(\d{4})\D',row)  ###### Extract 4 numbers , return
                         ID=IDs.group(0)  #####
                         #row= row[0]+"\n"
                         #print ID
@@ -83,6 +87,9 @@ def concentrate2single(infilepath,outputfilename):  #also reverse translate
                     single_fastq.append(row.lstrip('@'))
 
                 single_fastq[-1] = covert_Qscore(single_fastq[-1])
+                fasta_output +=single_fastq[1] + '\n'
+                raw_single_fasta_file.write(fasta_output)
+
 
                 if flag_reverse == True:
                     try:

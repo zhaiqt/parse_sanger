@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser(prog='process fasta sequences, translate and an
 parser.add_argument('-s', '--species', help='mouse, rabbit or human', default="mouse")
 parser.add_argument('-c', '--chain', help="H" or "L", default="H")
 parser.add_argument('-k', '--keylist',nargs='+', help="DNA,FV,CDR1,CDR2,CDR3, GERMLINE", default="DNAlen GERMLINE-V CDR3-DNA RID")
-parser.add_argument ('-i',"--inputfasta",type=str, help="input files directory", default='/Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/parse_sanger/results/LC_consensus_seqs.fasta',action='store')
+parser.add_argument ('-i',"--inputfasta",type=str, help="input files directory", default='/Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/parse_sanger/results/upkII.fasta',action='store')
 parser.add_argument ('-o',"--outputpath",type=str, help="input files directory", default='/Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/parse_sanger/results')
 
 args = parser.parse_args()
@@ -32,7 +32,7 @@ foo.readIgBlastn()
 #print igblastn_results
 for key in foo._dict:
     #print key
-    #print igblastn_results[key]
+    #print foo._dict[key]
     AbDict[key].update(foo._dict[key])
 
 ##### Anotate Ab Protein 1000 sequences using PWM      #######
@@ -45,8 +45,6 @@ for a,b in AbDict.iteritems():
     print a
     print b
 '''
-
-
 
 ######## write all the information of AbDict into all.txt######
 ### keyList=["GERMLINE-V","GERMLINE-D","GERMLINE-J","PRODUCT","CHAIN","LID","RID","DNA","PRO",'FR1-PRO','CDR1-PRO','FR2-PRO','CDR2-PRO',"FR3-PRO",'CDR3-PRO','FR4-PRO','FR1-DNA','CDR1-DNA','FR2-DNA','CDR2-DNA',"FR3-DNA",'CDR3-DNA','FR4-DNA']
