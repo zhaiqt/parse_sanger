@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser(prog='process fasta sequences, translate and an
 parser.add_argument('-s', '--species', help='mouse, rabbit or human', default="mouse")
 parser.add_argument('-c', '--chain', help="H" or "L", default="H")
 parser.add_argument('-k', '--keylist',nargs='+', help="DNA,FV,CDR1,CDR2,CDR3, GERMLINE", default="DNAlen GERMLINE-V CDR3-DNA RID")
-parser.add_argument ('-i',"--inputfasta",type=str, help="input files directory", default='/Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/parse_sanger/results/upkII.fasta',action='store')
+parser.add_argument ('-i',"--inputfasta",type=str, help="input files directory", default='/Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/parse_sanger/results/1128.txt',action='store')
 parser.add_argument ('-o',"--outputpath",type=str, help="input files directory", default='/Users/zhaiqi1/Documents/Novartis/my_code/ToolBox/parse_sanger/results')
 
 args = parser.parse_args()
@@ -35,6 +35,7 @@ for key in foo._dict:
     #print foo._dict[key]
     AbDict[key].update(foo._dict[key])
 
+print AbDict
 ##### Anotate Ab Protein 1000 sequences using PWM      #######
 foo = AnnotateProtein.AnnotateProtein(AbDict,args.species,args.chain)
 foo.AnnotateDict()

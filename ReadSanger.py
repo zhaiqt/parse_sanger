@@ -130,7 +130,7 @@ def write_fasta_bygroup(indict,outputpath,flag_trim):
     for ID,fastqs in indict.iteritems():
         fasta_outname = os.path.join(outputpath,ID)
         fasta_outfile = open(fasta_outname,'w')
-
+        i=0
         for fastq in fastqs:
             if flag_trim == True:
 
@@ -138,8 +138,9 @@ def write_fasta_bygroup(indict,outputpath,flag_trim):
                 object1.trim5End(minimum_quality=20)
                 fastq = object1.output_trimed_fastq()
 
-            output='>'+fastq[0]+'\n'+fastq[1]+'\n'
+            output='>'+fastq[0]+'_'+str(i)+'\n'+fastq[1]+'\n'
             fasta_outfile.write(output)
+            i+=1
         fasta_outfile.close()
     return
 ####################

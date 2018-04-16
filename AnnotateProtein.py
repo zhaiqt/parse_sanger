@@ -11,6 +11,7 @@ class AnnotateProtein(object):
 
         	self._dict=inDict
 
+
         	if species.lower() in ["mouse","human","rabbit"]:
 			self._species=species.lower()
 		else:
@@ -90,7 +91,7 @@ class AnnotateProtein(object):
 
 		FR1head=self.find_high_PMW_score(self._pwmFR1head,inProteinSeq)
 		FR1head_pos=inProteinSeq.find(FR1head)
-
+		print 'FR1head_pos: '+str(FR1head_pos)
 		#print "start to find FR2"
 		try :
 			FR1tail_pos=self._dict[inSeqID]["FR1tail_pos"]/3 -1
@@ -100,10 +101,11 @@ class AnnotateProtein(object):
 
 		new_FR1protein=inProteinSeq[FR1head_pos:FR1tail_pos+1]
 		new_FR1dna= translator.convertPROtoDNA(inDNAseq,FR1head_pos,FR1tail_pos+1)
+		print "new_FR1protein: " +new_FR1protein
 		if len(new_FR1dna)>=len(self._dict[inSeqID]['FR1-DNA']):
 			self._dict[inSeqID].update({'FR1-PRO':new_FR1protein})
 			self._dict[inSeqID].update({'FR1-DNA':new_FR1dna})
-		'''
+
 		try:
 			FR2head=self.find_high_PMW_score(self._pwmFR2head,inProteinSeq[FR1tail_pos:])
 			FR2head_pos=inProteinSeq.find(FR2head)
@@ -111,7 +113,7 @@ class AnnotateProtein(object):
 			self._dict[inSeqID].update({'CDR1-DNA':translator.convertPROtoDNA(inDNAseq,FR1tail_pos+1,FR2head_pos)})
 		except:
 			return
-		'''
+
 
 		try :
                         FR2head_pos=(self._dict[inSeqID]["FR2head_pos"]-1)/3
@@ -164,6 +166,7 @@ class AnnotateProtein(object):
 			self._dict[inSeqID].update({'FR3-DNA':translator.convertPROtoDNA(inDNAseq,FR3head_pos,FR3tail_pos+1)})
 
 		try:
+			print "SsSsss"
 			FR4head_pos = self._dict[inSeqID]["CD3tail_pos"]/3
 		except:
 			FR4head=self.find_high_PMW_score(self._pwmFR4head,inProteinSeq[FR3tail_pos:])
@@ -177,8 +180,8 @@ class AnnotateProtein(object):
 
 		FR4tail=self.find_high_PMW_score(self._pwmFR4tail,inProteinSeq[FR4head_pos:])
 		FR4tail_pos=inProteinSeq.find(FR4tail)+len(FR4tail)-1
-		print "$$$$$ FR4tail_pos + "
-		print FR4tail_pos
+		#print "$$$$$ FR4tail_pos + "
+		#print FR4tail_pos
 
 		if FR4head and FR4tail:
 			self._dict[inSeqID].update({'FR4-PRO':inProteinSeq[FR4head_pos:FR4tail_pos+1]})
@@ -199,62 +202,72 @@ class AnnotateProtein(object):
                 self._dict[inSeqID].update({'FV-DNA':FVdna})
 		#self._dict[inSeqID].update({'DNAlen':len(FVdna)})
 
+	def find_high_PMW_score (self,PMW_dict,fragment):
 
-        def find_high_PMW_score (self,PMW_dict,fragment):
-		#print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
-		#print fragment
 		if len(fragment)<len(PMW_dict):
 			return ""
 		input_seq=fragment
 		motif_size=len(PMW_dict)
-                find_flag=False
-                while (not find_flag) :
-                        stop= min(len(input_seq),motif_size)
-                        frag_window=input_seq[0:stop]
-			backup_frag= None
-			backup_score=  -1
-                        score=0
-                        i=0
-			while (i< motif_size) :
-				if input_seq[i]in ["*","x"]:
-					i+=1
-					continue
-                                #print "PMW_dict[str(i)]" + str(PMW_dict[str(i)])
-				#print "[input_seq[i]]" + input_seq[i]
+		find_flag=False
+		i=0
+		stop= min(len(input_seq),motif_size)
+		score=0
+		highest_score_frag = ''
+		highest_score = -1
+		#frag_window=input_seq[0:stop]
+
+		while (not find_flag):
+			#print input_seq[:motif_size]
+			if 'x' in input_seq[:motif_size] or '*' in input_seq[:motif_size] :
+				input_seq=input_seq[1:]
+				continue
+			frag_window=''
+			score = 0
+			i=0
+			#print "current input is : " +input_seq
+			while (i< motif_size and len(input_seq)>motif_size):
+				#print input_seq
+				#print i
+				frag_window +=input_seq[i]
+				#print "frag_window :" +frag_window
 				score= score+ float(PMW_dict[str(i)][input_seq[i]])
-				#tmp_table=PMW_dict[str(i)]['E']
-				#print "the current accumulate  score is at position"+str(i) +"is :" + str(score)
-				i+=1
-                        #print "score of %s is %d" %(frag_window,score)
-			if score >5:
-				return frag_window
-				break
-				#return frag_window
-			elif score <=5 and score > -1 and score >backup_score:
+				#print "score :" + str(score)
+				i +=1
+			#tmp_table=PMW_dict[str(i)]['E']
+			#print "the current accumulate  score is at position"+str(i) +"is :" + str(score)
+			#i+=1
+			#print "fragment window: " +frag_window
+			#print "######score of %s is %d" %(frag_window,score)
+			if score >10:
 				find_flag =True
-				backup_score =score
-				backup_frag = frag_window
+				highest_score_frag = frag_window
+				highest_score = score
+				return frag_window
+			# elif score <=10 and score >backup_score:
+			# 	find_flag =False
+			# 	backup_score =score
+			# 	backup_frag = frag_window
 			elif len(input_seq)<=motif_size:
 				break
-			elif len(input_seq)>motif_size and score <=5:
-                        	input_seq=input_seq[1:]
+			elif len(input_seq)>motif_size and score <=10:
+				input_seq=input_seq[1:]
 
-               	#print find_flag
-		#print frag_window
-                #print fragment.find(frag_window)
+				continue
+
 		if find_flag == True:
-			#print "Final Score of " + frag_window +' : ' + str(score)
-			return  backup_frag
+			print "Final Score of " + highest_score_frag+' : ' + str(highest_score)
+			return highest_score_frag
 		else:
-			#print "can't find"
+			print "can't find"
 			return ""
+
 
 
 ###----------Test----------
 #a={ 'M00680:164:000000000-AN2N4:1:2119:18838:25113': {'LID': 'TTCTGTAC', 'DNAlen': 357, 'FR1tail_pos': 78, 'DNA': 'GACATTCTGATGACCCAGTCTCCAGCTTCTTTGGCTGTGTCTCTAGGGCAGAGGGCCACCATCTCCTGCAAGGCCAGCCAAAGTGTTGATTATGATGGTGATAGTTATATGAACTGGTACCAACAGAAACCAGGACAGCCACCAAAACTCCTCATCTATGCTGCATCCAATCTAGAATCTGGGATCCCAGCCAGGTTTAGTGGCAGTGGGTCTGGGACAGACTTCACCCTCAACATCCATCCTGTGGAGGAGGAGGATGCTGCAACCTATTACTGTCAGCAAAGTAATGAGGATCCGTGGACGTTCGGTGGAGGCACCAAGCTGGAAATCAAACGGGCTGATGCTGCACCAACAGCATCCATCTTCCC', 'CDR3head_pos': 277, 'CDR2tail_pos': 168, 'CDR1tail_pos': 108, 'GERMLINE-J': 'JH3', 'FR1head_pos': 1, 'CDR3tail_pos': 296, 'FR2tail_pos': 159, 'PRO': 'DILMTQSPASLAVSLGQRATISCKASQSVDYDGDSYMNWYQQKPGQPPKLLIYAASNLESGIPARFSGSGSGTDFTLNIHPVEEEDAATYYCQQSNEDPWTFGGGTKLEIKRADAAPTASIF', 'CDR1head_pos': 79, 'GERMLINE-D': 'DSP2.9', 'FR2head_pos': 109, 'CDR2head_pos': 160, 'RID': 'GAGGCCCC', 'GERMLINE-V': 'J558.89pg.195','FR3head_pos':169,'FR3tail_pos':276}}
 
 '''
-a= {'test': { "DNA": 'CAGGTCCAACTGCAGCAGCCTGACATCTGAGGACTCTGCGGTCTATTACTGTGCAAGATCCGGTATTACTACGGTAGTAGCTACCCCCCTGTACTTCGATGTCTGGGGCACAGGGACCACGGTCACCGTCTCCTCAGCCAAAACAACACCCCCATCAGTCTATCCACTGGCCCCTGGGTGTGGAGATACAACTGGTTCCTCTGTGACTCTGGGATGCCTGGTCAAGGGCTACTTCCCTGAGTCAGTGACTGTGACTTGGAACTCTGGATCCCTGTCCAGCAGTGTGCACACCTTCCCAGCTCTCCTGCAGTCTGGACTCTACACTATGAGCAGCTCAGTGACTGTCCCCTCCAGCACCTGGCCAAGTCAGACCGTCACCTGCAGCGTTGCTCACCCAGCCAGCAGCACCACTCTCACAGTCTCCTCATTACAGGTTACCCATACGATGTTCCAGATTACGCT', 'LID': 'TTCTGTAC','CDR3head_pos': 53, 'CDR3tail_pos': 58, 'FR3head_pos':13, 'FR3tail_pos':52, 'PRO':'RSNCSSLTSEDSAVYYCARSGITTVVATPLYFDVWGTGTTVTVSSAKTTPPSVYPLAPGCGDTTGSSVTLGCLVKGYFPESVTVTWNSGSLSSSVHTFPALLQSGLYTMSSSVTVPSSTWPSQTVTCSVAHPASSTTLTVSSLQVTHTMFQIT'}}
+a= {'-1128-_1': {'FR1tail_pos': 193, 'DNA': 'NNNNNNNNNNNNNNCNNGGTGTCCNCTCCCAGGTCCNACTGCACGGAAGCTTGCCGCCACCATGGGCTGGAGCTGCATCATCCTGTTCCTGGTGGCAACTGCAACCGGTGTACATTCACAAGTGCAATTGAAGGAATCCGGTCCGGGACTTGTGGCTCCGAGTCAGTCATTGTCTATAACTTGCACAGTCAGTGGGTTCAGCCTGACTGACTACGGCGTGCACTGGGTCCATCAGCCCCCAGGAAAAGGCCTTGAATGGCTTGGCGTTATATGGGCAGGGGGTTCAACGAACTATAATTCCGCTCTTATGAGCCGCCTTATCATTATCAAGGATAACTCTTACACCCAGATTTTCCTGAAGATGAACTCTTTGCAGACTGATGACACTTCAATGTACTACTGTGCTAAACCACAACTGGGTCCTTACTGGTATTTCGACGTGTGGGGTGCTGGAACGACGGTCACTAGCTCAGCTAGCACCAAGGGCCCCAGCGTGTTCCCCCTGGCCCCCAGCAGCAAGAGCACCAGCGGCGGCACAGCCGCCCTGGGCTGCCTGGTGAAGGACTACTTCCCCGAGCCCGTGACCGTGTCCTGGAACAGCGGAGCCCTGACCTCCGGCGTGCACACCTTCCCCGCCGTGCTGCAGAGCAGCGGCCTGTACAGCCTGTCCAGCGTGGTGACAGTGCCCAGCAGCAGCCTGGGCACCCAGACCTACATCTGCAACGTGAACCACAAGCCCAGCAACACCAAGGTGGACAAGAGAGTGGAGCCCAAGAGCTGCGACAAGACCCACACCTGCCCCCCCTGCCCAGCCCCAGAGCTGCTGGGCGGACCCTCCGTGTTCCTGTTCCCCCCCAAGCCCAANGGACACCCTGATGATCAGCNNACCCCCGAGGTGACCTGCGTGGTGGTGGACGTGAGCCACNAGGACCCANAGTGAAGTTCAACTGNTACGTGGACGGCGTGGAGGTGCACAACGCCAAGACCAAGCCCNNANAGGANCAGTACACAGCACCTACNGGGTGGTGTCCGTGCTGACCGTGCTGCACCAGNANTGGNTGANGGCANGNNTACNANTGCNAGNCNTCANNNGGCCCNNNCAGCCCCNTCGAAANNNNTCNNCANNNAGGNNNNCNNGNNNCCNGGNNNNNNCCNNCCCCNTCCGNNNANNANNNANNNNNNNNCCTGANNNNNTGNNNNAN', 'CDR3head_pos': 404, 'CDR2tail_pos': 289, 'CDR1tail_pos': 217, 'FR3tail_pos': 403, 'GERMLINE-J': 'JH1', 'FR1head_pos': 119, 'CDR3tail_pos': 405, 'FR2tail_pos': 268, 'PRO': 'xxxxxxCxLPGxTARKLAATMGWSCIILFLVATATGVHSQVQLKESGPGLVAPSQSLSITCTVSGFSLTDYGVHWVHQPPGKGLEWLGVIWAGGSTNYNSALMSRLIIIKDNSYTQIFLKMNSLQTDDTSMYYCAKPQLGPYWYFDVWGAGTTVTSSASTKGPSVFPLAPSSKSTSGGTAALGCLVKDYFPEPVTVSWNSGALTSGVHTFPAVLQSSGLYSLSSVVTVPSSSLGTQTYICNVNHKPSNTKVDKRVEPKSCDKTHTCPPCPAPELLGGPSVFLFPPKPxGHPDDQxTPEVTCVVVDVSHxDPx*SSTxTWTAWRCTTPRPSxxRxSTQHLxGGVRADRAAPxxxxGxxxxxxxxxAxxAxSKxxxxxxxxxxxxxxPxPxxxxxxx*xxxx', 'CDR1head_pos': 194, 'GERMLINE-D': 'DQ52-BALB/c', 'FR3head_pos': 290, 'FR2head_pos': 218, 'CDR2head_pos': 269, 'GERMLINE-V': 'VHQ52.a27.79'}}
 
 b=AnnotateProtein(a,'mouse',"H")
 b.AnnotateDict()

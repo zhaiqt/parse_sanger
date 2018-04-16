@@ -11,6 +11,7 @@ def read_fasta(inputfilename):
         if line.startswith('>'):
             if name and seq:
                 seq=seq.replace(' ','')
+                seq=seq.upper()
                 protein=translator.choose_translation(seq)
                 dict[name] = {'DNA': seq, 'PRO': protein}
             line=line.lstrip('>')
@@ -23,6 +24,8 @@ def read_fasta(inputfilename):
             seq +=line
 
     seq=seq.replace(' ','')
+    seq=seq.upper()
+    print seq
     protein=translator.choose_translation(seq)
     dict[name] = {'DNA': seq, 'PRO': protein}
 
